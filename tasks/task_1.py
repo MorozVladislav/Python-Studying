@@ -1,7 +1,7 @@
 """
 TASK: Create 'foo' object which allows you to run code below and get expected output.
 
-EXPECTEDOUTPUT:
+EXPECTED OUTPUT:
 
 Mimosa
 Acrux
