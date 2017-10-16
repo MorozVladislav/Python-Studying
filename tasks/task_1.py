@@ -1,5 +1,7 @@
 """
-OUTPUT:
+TASK: Create 'foo' object which allows you to run code below and get expected output.
+
+EXPECTEDOUTPUT:
 
 Mimosa
 Acrux
@@ -13,6 +15,7 @@ Alpha Centauri
 Algol,Polaris
 Algol,Polaris
 Regulus
+
 """
 
 print(foo[0]('Mimosa').name)
