@@ -1,5 +1,5 @@
 class Stars:
-    def __init__(self, star_name):
+    def __init__(self, star_name=None):
         if star_name is not None:
             self.name = star_name
         else:
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         set(),
         "Regulus"
     ]
-# some comment
+
     print(foo[0]('Mimosa').name)
     print(foo[1]['Sirius'][0].name)
     print(foo[1]['Sirius'][1]().name)
