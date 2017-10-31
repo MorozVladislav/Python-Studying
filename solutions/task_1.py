@@ -1,5 +1,5 @@
 class Stars:
-    def __init__(self, star_name=None):
+    def __init__(self, star_name):
         if star_name is not None:
             self.name = star_name
         else:
@@ -22,14 +22,11 @@ def func_2():
 
 if __name__ == '__main__':
     foo = [
-        Stars,
-        {"Sirius": [Stars(), Stars]},
-        {"Arcturus": [[{"Vega": Stars}]],
-         "Capella": {"Rigel": {"Procyon": func_1,
-                               "Achernar": func_2
-                               }
-                     }
-         },
+        Stars, {"Sirius": [Stars(), Stars]}, {"Arcturus": [[{"Vega": Stars}]], "Capella": {"Rigel": {"Procyon": func_1,
+                                                                                                     "Achernar": func_2
+                                                                                                     }
+                                                                                           }
+                                              },
         ("Alpha Centauri",),
         set(),
         set(),
