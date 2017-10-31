@@ -32,7 +32,7 @@ if __name__ == '__main__':
         set(),
         "Regulus"
     ]
-
+# some comment
     print(foo[0]('Mimosa').name)
     print(foo[1]['Sirius'][0].name)
     print(foo[1]['Sirius'][1]().name)
