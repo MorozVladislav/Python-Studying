@@ -20,7 +20,7 @@ if __name__ == '__main__':
     fake[42]
     fake['non existing key']
     fake[generate_string()]
-    fake2 = fake.blablabla()
+    fake2 = fake.blablabla('bla', bla='bla')
     fake2.whatever()
     fake2.whatever.again_whatever().and_again['foo']['bar'][1]
     getattr(fake2, generate_string())()()()()[generate_string()]()()()('lol')
