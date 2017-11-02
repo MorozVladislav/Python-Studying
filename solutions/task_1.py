@@ -1,9 +1,10 @@
 class Stars:
-    def __init__(self, star_name=None):
-        if star_name is not None:
+    def __init__(self, *var):
+        star_name = "Acrux"
+        if not var:
             self.name = star_name
         else:
-            self.name = "Acrux"
+            self.name = var[0]
 
     def __eq__(self, other):
         return self.name == other.name
