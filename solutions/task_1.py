@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 TASK: Create 'foo' object which allows you to run code below and get expected output.
 
@@ -18,13 +19,9 @@ Regulus
 """
 
 
-class Stars:
-    def __init__(self, *var):
-        star_name = "Acrux"
-        if not var:
-            self.name = star_name
-        else:
-            self.name = var[0]
+class Stars(object):
+    def __init__(self, star_name="Acrux"):
+        self.name = star_name
 
     def __eq__(self, other):
         return self.name == other.name
