@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 TASK: Create 'foo' object which allows you to run code below and get expected output.
 
