@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 TASK: Create 'Fake' class to run code below without errors.
 """
