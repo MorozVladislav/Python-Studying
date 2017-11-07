@@ -7,36 +7,30 @@ import random
 import string
 
 
-class Fake(dict):
+class Fake(object):
     def __getattr__(self, name):
         print("Non existing attribute {} has been called".format(name))
         return self
 
     def __call__(self, *args, **kwargs):
         try:
-            dict.__call__(*args, **kwargs)
+            super.__call__(self, *args, **kwargs)
             return self
-        except (TypeError, ValueError):
+        except TypeError:
             print("The attribute has been called with:")
-            if len(args) > 0:
-                print("- positional arguments: {}".format(str(", ".join(args))))
+            if args:
+                print("- positional arguments: {}".format(args))
             else:
                 print("- no positional arguments")
-            if len(kwargs) > 0:
-                kwargs_list = []
-                for k, v in kwargs.items():
-                    kwargs_list.append(str(k) + " = " + str(v))
-                print("- keyword arguments: {}".format(str(", ".join(kwargs_list))))
+            if kwargs:
+                print("- keyword arguments: {}".format(kwargs))
             else:
                 print("- no keyword arguments")
             return self
 
     def __getitem__(self, item):
-        try:
-            return dict.__getitem__(self, item)
-        except KeyError:
-            print("Unexisting key {} has been called".format(item))
-            return self
+        print("Attempt to get unexisting key {}".format(item))
+        return self
 
 
 def generate_string(length=10):
