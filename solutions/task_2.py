@@ -14,9 +14,9 @@ class Fake(object):
 
     def __call__(self, *args, **kwargs):
         try:
-            super.__call__(self, *args, **kwargs)
+            super().__call__(self, *args, **kwargs)
             return self
-        except TypeError:
+        except AttributeError:
             print("The attribute has been called with:")
             if args:
                 print("- positional arguments: {}".format(args))
@@ -29,7 +29,7 @@ class Fake(object):
             return self
 
     def __getitem__(self, item):
-        print("Attempt to get unexisting key {}".format(item))
+        print("Attempt to get nonexistent key {}".format(item))
         return self
 
 
