@@ -15,7 +15,7 @@ class Fake(object):
     def __call__(self, *args, **kwargs):
         """
         try:
-            super(Fake, self).__call__(self, *args, **kwargs)
+            super(Fake, self).__call__(*args, **kwargs)
         except AttributeError:
             print("with following arguments:")
             if args:
