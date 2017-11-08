@@ -9,15 +9,15 @@ import string
 
 class Fake(object):
     def __getattr__(self, name):
-        print("Non existing attribute {} has been called".format(name))
+        #print("Attempt to get nonexistent attribute {}".format(name))
         return self
 
     def __call__(self, *args, **kwargs):
+        """
         try:
-            super().__call__(self, *args, **kwargs)
-            return self
+            super(Fake, self).__call__(self, *args, **kwargs)
         except AttributeError:
-            print("The attribute has been called with:")
+            print("with following arguments:")
             if args:
                 print("- positional arguments: {}".format(args))
             else:
@@ -25,11 +25,11 @@ class Fake(object):
             if kwargs:
                 print("- keyword arguments: {}".format(kwargs))
             else:
-                print("- no keyword arguments")
-            return self
+                print("- no keyword arguments")"""
+        return self
 
     def __getitem__(self, item):
-        print("Attempt to get nonexistent key {}".format(item))
+        #print("Attempt to get nonexistent key {}".format(item))
         return self
 
 
