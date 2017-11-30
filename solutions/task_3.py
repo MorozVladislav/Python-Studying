@@ -6,21 +6,22 @@ import time
 from datetime import datetime, timedelta
 
 
+CACHE = {}
+CACHE_LIFE_TIME = 1
+
+
 def add_2(func):
-    def wrapper(a, b):
-        return func(a, b) + 2
-    return wrapper
+    def wrapped(*args, **kwargs):
+        return func(*args, **kwargs) + 2
+    return wrapped
 
 
 def add_n(n):
-    def wrapper_1(func):
-        def wrapper_2(a, b):
-            return func(a, b) + n
-        return wrapper_2
-    return wrapper_1
-
-
-CACHE = {}
+    def wrapper(func):
+        def wrapped(*args, **kwargs):
+            return func(*args, **kwargs) + n
+        return wrapped
+    return wrapper
 
 
 def cached(cache_life_time):
@@ -28,35 +29,40 @@ def cached(cache_life_time):
         CACHE[func] = {}
 
         def wrapper_2(*args, **kwargs):
-            if str(args) + str(kwargs) not in CACHE[func].keys():
-                CACHE[func][str(args) + str(kwargs)] = [None, None]
-                CACHE[func][str(args) + str(kwargs)][0] = func(*args, **kwargs)
-                CACHE[func][str(args) + str(kwargs)][1] = datetime.now()
-                return CACHE[func][str(args) + str(kwargs)][0]
-            if (datetime.now() - CACHE[func][str(args)+str(kwargs)][1]).total_seconds() < cache_life_time:
-                return CACHE[func][str(args)+str(kwargs)][0]
-            CACHE[func][str(args)+str(kwargs)][0] = func(*args, **kwargs)
-            CACHE[func][str(args)+str(kwargs)][1] = datetime.now()
-            return CACHE[func][str(args)+str(kwargs)][0]
+            key = str(args) + str(kwargs)
+            if key not in CACHE[func]:
+                CACHE[func][key] = [func(*args, **kwargs), time.time()]
+                return CACHE[func][key][0]
+            if (time.time() - CACHE[func][key][1]) < cache_life_time:
+                return CACHE[func][key][0]
+            else:
+                CACHE[func][key][0] = func(*args, **kwargs)
+                CACHE[func][key][1] = time.time()
+                return CACHE[func][key][0]
         return wrapper_2
     return wrapper_1
 
 
 class Contact(object):
     def __init__(self, phone, operator):
-        self._phone_ = phone
-        self.operator = operator
+        self._phone = phone
+        self._operator = operator
 
     @property
     def phone(self):
-        return "{} {} {}".format("".join(self._phone_[:4]), "".join(self._phone_[4:]), self.operator)
+        return "".join("".join(self._phone[:-7]) + " " + "".join(self._phone[-7:]) + " " + self.operator)
 
     @phone.setter
     def phone(self, value):
-        self._phone_ = value
+        self._phone = value
 
+    @property
+    def operator(self):
+        return self._operator
 
-CACHE_LIFE_TIME = 1
+    @operator.setter
+    def operator(self, value):
+        self._operator = value
 
 
 @add_2
