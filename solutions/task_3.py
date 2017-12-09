@@ -4,13 +4,14 @@ TASK: Implement decorators 'add_2', 'add_n', 'cached' and class 'Contact' to per
 """
 import time
 from datetime import datetime, timedelta
-
+from functools import wraps
 
 CACHE = {}
 CACHE_LIFE_TIME = 1
 
 
 def add_2(func):
+    @wraps(func)
     def wrapped(*args, **kwargs):
         return func(*args, **kwargs) + 2
     return wrapped
@@ -18,6 +19,7 @@ def add_2(func):
 
 def add_n(n):
     def wrapper(func):
+        @wraps(func)
         def wrapped(*args, **kwargs):
             return func(*args, **kwargs) + n
         return wrapped
@@ -25,21 +27,21 @@ def add_n(n):
 
 
 def cached(cache_life_time):
-    def wrapped(func):
+    def wrapper(func):
+
         CACHE[func] = {}
 
-        def wrapper(*args, **kwargs):
-            key = str(args) + str(kwargs)
-            if key not in CACHE[func]:
-                CACHE[func][key] = [func(*args, **kwargs), time.time()]
-                return CACHE[func][key][0]
-            if (time.time() - CACHE[func][key][1]) < cache_life_time:
-                return CACHE[func][key][0]
-            else:
-                CACHE[func][key] = [func(*args, **kwargs), time.time()]
-                return CACHE[func][key][0]
-        return wrapper
-    return wrapped
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+            key = '|'.join([str(args), str(kwargs)])
+            result, created_at = CACHE[func].get(key, (None, None))
+            if created_at is None or (time.time() - created_at) >= cache_life_time:
+                result = func(*args, **kwargs)
+                CACHE[func][key] = [result, time.time()]
+            return result
+        return wrapped
+
+    return wrapper
 
 
 class Contact(object):
@@ -49,7 +51,7 @@ class Contact(object):
 
     @property
     def phone(self):
-        return " ".join([self._phone[:-7], self._phone[-7:], self.operator])
+        return ' '.join([self._phone[:-7], self._phone[-7:], self.operator])
 
     @phone.setter
     def phone(self, value):
@@ -64,11 +66,13 @@ class Contact(object):
         self._operator = value
 
 
+@cached(CACHE_LIFE_TIME)
 @add_2
 def multiply_1(a, b):
     return a * b
 
 
+@cached(CACHE_LIFE_TIME)
 @add_n(5)
 def multiply_2(a, b):
     return a * b
@@ -84,7 +88,9 @@ def get_datetime_now(add_timedelta=None):
 
 if __name__ == '__main__':
     assert multiply_1(3, 4) == 14
+    assert multiply_1.__name__ == 'multiply_1'
     assert multiply_2(3, 4) == 17
+    assert multiply_2.__name__ == 'multiply_2'
 
     datetime1 = get_datetime_now()
     datetime2 = get_datetime_now()
@@ -92,6 +98,7 @@ if __name__ == '__main__':
     time.sleep(CACHE_LIFE_TIME)
     datetime3 = get_datetime_now()
     assert datetime1 < datetime3
+    assert get_datetime_now.__name__ == 'get_datetime_now'
 
     datetime1 = get_datetime_now(add_timedelta=timedelta(hours=1))
     datetime2 = get_datetime_now(add_timedelta=timedelta(hours=1))
