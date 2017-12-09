@@ -25,10 +25,10 @@ def add_n(n):
 
 
 def cached(cache_life_time):
-    def wrapper_1(func):
+    def wrapped(func):
         CACHE[func] = {}
 
-        def wrapper_2(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             key = str(args) + str(kwargs)
             if key not in CACHE[func]:
                 CACHE[func][key] = [func(*args, **kwargs), time.time()]
@@ -36,11 +36,10 @@ def cached(cache_life_time):
             if (time.time() - CACHE[func][key][1]) < cache_life_time:
                 return CACHE[func][key][0]
             else:
-                CACHE[func][key][0] = func(*args, **kwargs)
-                CACHE[func][key][1] = time.time()
+                CACHE[func][key] = [func(*args, **kwargs), time.time()]
                 return CACHE[func][key][0]
-        return wrapper_2
-    return wrapper_1
+        return wrapper
+    return wrapped
 
 
 class Contact(object):
@@ -50,7 +49,7 @@ class Contact(object):
 
     @property
     def phone(self):
-        return "".join("".join(self._phone[:-7]) + " " + "".join(self._phone[-7:]) + " " + self.operator)
+        return " ".join([self._phone[:-7], self._phone[-7:], self.operator])
 
     @phone.setter
     def phone(self, value):
