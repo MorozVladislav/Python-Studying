@@ -9,7 +9,7 @@ from datetime import datetime
 # INSERT YOUR CODE HERE
 
 
-class TestStringMethods(unittest.TestCase):
+class TestTask4(unittest.TestCase):
 
     def test_temperature(self):
         tmprt = Temperature(212)
