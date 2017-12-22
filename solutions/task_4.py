@@ -9,48 +9,54 @@ from datetime import datetime
 
 class Temperature(object):
 
-    def __init__(self, value=0):
-        self.fahrenheit = value
+    def __init__(self, fahrenheit=0):
+        self.fahrenheit = fahrenheit
 
-    def get_celsius(self):
+    def _get_celsius(self):
         return (self.fahrenheit - 32)/1.8
 
-    def set_celsius(self, value):
-        self.fahrenheit = value*1.8 + 32
+    def _set_celsius(self, celsius):
+        self.fahrenheit = celsius*1.8 + 32
 
-    celsius = property(get_celsius, set_celsius)
+    celsius = property(_get_celsius, _set_celsius)
 
 
-class Descriptor(object):
+class PersonField(object):
 
-    def __init__(self, attr_name, attr_type):
-        self.attr_name = attr_name
-        self.attr_type = attr_type
+    def __init__(self, attrname, attrtype):
+        self.attrname = attrname
+        self.attrtype = attrtype
 
     def __get__(self, instance, owner):
-        return instance.__dict__[self.attr_name]
+        return instance.__dict__[self.attrname]
 
-    def __set__(self, instance, attr_value):
-        if self.attr_type != type(attr_value):
+    def __set__(self, instance, attrvalue):
+        if type(attrvalue) is not self.attrtype:
             raise TypeError
-        if self.attr_name == 'phone':
-            pattern = r"[0-9]{3} [0-9]{2} [0-9]{7}$"
-            if re.match(pattern, attr_value):
-                instance.__dict__.__setitem__(self.attr_name, "+{} ({}) {}-{}-{}".format(attr_value[:3],
-                                                                                         attr_value[4:6],
-                                                                                         attr_value[7:10],
-                                                                                         attr_value[10:12],
-                                                                                         attr_value[12:]))
+        if self.attrname == 'phone':
+            pattern = r"^[0-9]{3} [0-9]{2} [0-9]{7}$"
+            if re.match(pattern, attrvalue):
+                instance.__dict__[self.attrname] = "+{} ({}) {}-{}-{}".format(attrvalue[:3],
+                                                                              attrvalue[4:6],
+                                                                              attrvalue[7:10],
+                                                                              attrvalue[10:12],
+                                                                              attrvalue[12:])
             else:
                 raise ValueError
         else:
-            instance.__dict__.__setitem__(self.attr_name, attr_value)
+            instance.__dict__[self.attrname] = attrvalue
+
+
+class PersonFieldType(object):
+    Birthday = ('birthday', datetime)
+    Name = ('name', str)
+    Phone = ('phone', str)
 
 
 class Person(object):
-    birthday = Descriptor('birthday', datetime)
-    name = Descriptor('name', str)
-    phone = Descriptor('phone', str)
+    birthday = PersonField(*PersonFieldType.Birthday)
+    name = PersonField(*PersonFieldType.Name)
+    phone = PersonField(*PersonFieldType.Phone)
 
 
 class TestTask4(unittest.TestCase):
