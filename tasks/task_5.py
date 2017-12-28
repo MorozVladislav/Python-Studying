@@ -47,6 +47,8 @@ class TestTask5(unittest.TestCase):
                 first_result_elapsed_time = time.time() - start_time
                 self.assertLess(first_result_elapsed_time, 2)
             self.assertEqual(int_values[i] * multiplier, result)
+        else:
+            self.assertEqual(i + 1, len(int_values))
 
     def test_3(self):
         result1 = test3_func1(MY_DICT)
