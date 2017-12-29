@@ -21,42 +21,49 @@ class Temperature(object):
     celsius = property(_get_celsius, _set_celsius)
 
 
-class PersonField(object):
-
-    def __init__(self, attrname, attrtype):
-        self.attrname = attrname
-        self.attrtype = attrtype
-
-    def __get__(self, instance, owner):
-        return instance.__dict__[self.attrname]
-
-    def __set__(self, instance, attrvalue):
-        if type(attrvalue) is not self.attrtype:
-            raise TypeError
-        if self.attrname == 'phone':
-            pattern = r"^[0-9]{3} [0-9]{2} [0-9]{7}$"
-            if re.match(pattern, attrvalue):
-                instance.__dict__[self.attrname] = "+{} ({}) {}-{}-{}".format(attrvalue[:3],
-                                                                              attrvalue[4:6],
-                                                                              attrvalue[7:10],
-                                                                              attrvalue[10:12],
-                                                                              attrvalue[12:])
-            else:
-                raise ValueError
-        else:
-            instance.__dict__[self.attrname] = attrvalue
-
-
 class PersonFieldType(object):
     Birthday = ('birthday', datetime)
     Name = ('name', str)
     Phone = ('phone', str)
 
 
+class PersonField(object):
+
+    @staticmethod
+    def _phone_format(phone):
+        pattern = r"^[0-9]{3} [0-9]{2} [0-9]{7}$"
+        if re.match(pattern, phone):
+            return "+{} ({}) {}-{}-{}".format(phone[:3], phone[4:6], phone[7:10], phone[10:12],
+                                              phone[12:])
+        else:
+            raise ValueError
+
+    FORMAT_MAP = {
+        PersonFieldType.Phone: _phone_format,
+    }
+
+    def __init__(self, field_type):
+        self.field_type = field_type
+        self.attr_name = field_type[0]
+        self.attr_type = field_type[1]
+
+    def __get__(self, instance, owner):
+        return instance.__dict__[self.attr_name]
+
+    def __set__(self, instance, attr_value):
+        if self.field_type in self.FORMAT_MAP:
+            instance.__dict__[self.attr_name] = self.FORMAT_MAP[self.field_type].__func__(attr_value)
+        else:
+            if type(attr_value) is self.attr_type:
+                instance.__dict__[self.attr_name] = attr_value
+            else:
+                raise TypeError
+
+
 class Person(object):
-    birthday = PersonField(*PersonFieldType.Birthday)
-    name = PersonField(*PersonFieldType.Name)
-    phone = PersonField(*PersonFieldType.Phone)
+    birthday = PersonField(PersonFieldType.Birthday)
+    name = PersonField(PersonFieldType.Name)
+    phone = PersonField(PersonFieldType.Phone)
 
 
 class TestTask4(unittest.TestCase):
