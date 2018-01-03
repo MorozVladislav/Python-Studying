@@ -22,7 +22,7 @@ class Temperature(object):
     celsius = property(_get_celsius, _set_celsius)
 
 
-FieldType = namedtuple('Field', ['name', 'type', 'formatter'])
+FieldType = namedtuple('FieldType', ['name', 'type', 'formatter'])
 
 
 class PersonFieldFormatter(object):
