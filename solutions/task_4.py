@@ -4,6 +4,7 @@ TASK: Implement classes "Temperature", "Person" using Python descriptor protocol
 """
 import re
 import unittest
+from collections import namedtuple
 from datetime import datetime
 
 
@@ -21,43 +22,45 @@ class Temperature(object):
     celsius = property(_get_celsius, _set_celsius)
 
 
+FieldType = namedtuple('Field', ['name', 'type', 'formatter'])
+
+
+class PersonFieldFormatter(object):
+
+    @staticmethod
+    def phone_format(phone):
+        pattern = r"^[0-9]{3} [0-9]{2} [0-9]{7}$"
+        if re.match(pattern, phone):
+            return "+{} ({}) {}-{}-{}".format(phone[:3], phone[4:6], phone[7:10], phone[10:12], phone[12:])
+        else:
+            raise ValueError
+
+
 class PersonFieldType(object):
-    Birthday = ('birthday', datetime)
-    Name = ('name', str)
-    Phone = ('phone', str)
+
+    Birthday = FieldType('birthday', datetime, None)
+    Name = FieldType('name', str, None)
+    Phone = FieldType('phone', str, PersonFieldFormatter.phone_format)
 
 
 class PersonField(object):
 
-    @staticmethod
-    def _phone_format(phone):
-        pattern = r"^[0-9]{3} [0-9]{2} [0-9]{7}$"
-        if re.match(pattern, phone):
-            return "+{} ({}) {}-{}-{}".format(phone[:3], phone[4:6], phone[7:10], phone[10:12],
-                                              phone[12:])
-        else:
-            raise ValueError
-
-    FORMAT_MAP = {
-        PersonFieldType.Phone: _phone_format,
-    }
-
     def __init__(self, field_type):
-        self.field_type = field_type
-        self.attr_name = field_type[0]
-        self.attr_type = field_type[1]
+        self.field = field_type
 
     def __get__(self, instance, owner):
-        return instance.__dict__[self.attr_name]
+        return instance.__dict__[self.field.name]
 
     def __set__(self, instance, attr_value):
-        if self.field_type in self.FORMAT_MAP:
-            instance.__dict__[self.attr_name] = self.FORMAT_MAP[self.field_type].__func__(attr_value)
+        if not isinstance(attr_value, self.field.type):
+            raise TypeError
+
+        if self.field.formatter is not None:
+            formatted_value = self.field.formatter(attr_value)
         else:
-            if type(attr_value) is self.attr_type:
-                instance.__dict__[self.attr_name] = attr_value
-            else:
-                raise TypeError
+            formatted_value = attr_value
+
+        instance.__dict__[self.field.name] = formatted_value
 
 
 class Person(object):
