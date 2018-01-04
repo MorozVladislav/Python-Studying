@@ -45,11 +45,13 @@ class PersonFieldType(object):
 
 class PersonField(object):
 
+    PERSON_FIELDS = '_person_fields'
+
     def __init__(self, field_type):
         self.field = field_type
 
     def __get__(self, instance, owner):
-        return instance.__dict__[self.field.name]
+        return getattr(instance, self.PERSON_FIELDS, {}).get(self.field.name, None)
 
     def __set__(self, instance, attr_value):
         if not isinstance(attr_value, self.field.type):
@@ -60,7 +62,11 @@ class PersonField(object):
         else:
             formatted_value = attr_value
 
-        instance.__dict__[self.field.name] = formatted_value
+        field = {self.field.name: formatted_value}
+        if hasattr(instance, self.PERSON_FIELDS):
+            getattr(instance, self.PERSON_FIELDS).update(field)
+        else:
+            setattr(instance, self.PERSON_FIELDS, field)
 
 
 class Person(object):
