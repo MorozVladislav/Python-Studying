@@ -32,7 +32,7 @@ def long_func(multiplier, int_value):
 class TestTask5(unittest.TestCase):
 
     def compare_lists_ignore_order(self, test_list, expected_list):
-        self.assertEqual(sorted(test_list), sorted(expected_list))
+        self.assertEqual(sorted(test_list, key=hash), sorted(expected_list, key=hash))
 
     def test_1(self):
         self.compare_lists_ignore_order(test1_func1(MY_DICT), EXPECTED_RESULT)
