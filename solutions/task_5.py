@@ -26,36 +26,46 @@ def long_func(multiplier, int_value):
     return multiplier * int_value
 
 
-def value_checkup(value, output_list):
-    if isinstance(value, dict) or isinstance(value, list) or isinstance(value, tuple):
-        value_extractor(value, output_list)
+def test1_func1(value, output=[]):
+    if isinstance(value, (dict, list, tuple)):
+        output_list = test1_func2(value, output)
         return output_list
     else:
-        output_list.append(value)
-        return output_list
+        output.append(value)
+        return output
 
 
-def value_extractor(iterable_obj, output_list):
+def test1_func2(iterable_obj, output):
     if isinstance(iterable_obj, dict):
         for value in iterable_obj.values():
-            value_checkup(value, output_list)
+            output_list = test1_func1(value, output)
         return output_list
     else:
         for value in iterable_obj:
-            value_checkup(value, output_list)
+            output_list = test1_func1(value, output)
         return output_list
 
 
-def test1_func1(input_dict):
-    output = []
-    value_checkup(input_dict, output)
-    return output
+def test2_func1(func, ints):
+    for value in ints:
+        result = func(value)
+        yield result
+
+
+def test3_func1(dictionary):
+    for value in test1_func1(dictionary, []):
+        yield value
+
+
+def test3_func2(iterable):
+    for value in iterable:
+        yield value
 
 
 class TestTask5(unittest.TestCase):
 
     def compare_lists_ignore_order(self, test_list, expected_list):
-        self.assertEqual(sorted(test_list), sorted(expected_list))
+        self.assertEqual(sorted(test_list, key=hash), sorted(expected_list, key=hash))
 
     def test_1(self):
         self.compare_lists_ignore_order(test1_func1(MY_DICT), EXPECTED_RESULT)
