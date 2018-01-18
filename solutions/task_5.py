@@ -27,39 +27,40 @@ def long_func(multiplier, int_value):
 
 
 def test1_func1(value, output=[]):
-    if isinstance(value, (dict, list, tuple)):
-        output_list = test1_func2(value, output)
-        return output_list
+    if isinstance(value, dict):
+        for item in value.values():
+            test1_func1(item, output)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            test1_func1(item, output)
     else:
         output.append(value)
-        return output
-
-
-def test1_func2(iterable_obj, output):
-    if isinstance(iterable_obj, dict):
-        for value in iterable_obj.values():
-            output_list = test1_func1(value, output)
-        return output_list
-    else:
-        for value in iterable_obj:
-            output_list = test1_func1(value, output)
-        return output_list
+    return output
 
 
 def test2_func1(func, ints):
     for value in ints:
-        result = func(value)
-        yield result
+        yield func(value)
 
 
-def test3_func1(dictionary):
-    for value in test1_func1(dictionary, []):
-        yield value
+def test3_func1(iterable):
+    if isinstance(iterable, dict):
+        for value in iterable.values():
+            gen = test3_func1(value)
+            for item in gen:
+                yield item
+    else:
+        yield iterable
 
 
 def test3_func2(iterable):
-    for value in iterable:
-        yield value
+    if isinstance(iterable, (list, tuple, types.GeneratorType)):
+        for value in iterable:
+            gen = test3_func2(value)
+            for item in gen:
+                yield item
+    else:
+        yield iterable
 
 
 class TestTask5(unittest.TestCase):
