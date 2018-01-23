@@ -43,21 +43,19 @@ def test2_func1(func, ints):
         yield func(value)
 
 
-def test3_func1(iterable):
-    if isinstance(iterable, dict):
-        for value in iterable.values():
-            gen = test3_func1(value)
-            for item in gen:
+def test3_func1(dictionary):
+    if isinstance(dictionary, dict):
+        for value in dictionary.values():
+            for item in test3_func1(value):
                 yield item
     else:
-        yield iterable
+        yield dictionary
 
 
 def test3_func2(iterable):
     if isinstance(iterable, (list, tuple, types.GeneratorType)):
         for value in iterable:
-            gen = test3_func2(value)
-            for item in gen:
+            for item in test3_func2(value):
                 yield item
     else:
         yield iterable
