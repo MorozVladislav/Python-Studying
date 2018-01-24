@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TASK: Implement a least following functions to execute unittests without errors:
+TASK: Implement at least following functions to execute unittests without errors:
 
 'pair_sum_1':
     Takes arguments: sequence, expected_sum.
@@ -11,7 +11,7 @@ TASK: Implement a least following functions to execute unittests without errors:
     Returns largest sum of continuous sequence among all possible sequences:
     sum(largest_seq) = max(sum(seq_1), sum(seq_2), sum(seq_3), ..., sum(seq_n))
 
-'convert_array_1':
+'convert_sequence_1':
     Takes arguments: sequence, period.
     Converts sequence from [a1, a2, a3, b1, b2, b3, c1, c2, c3, ...]
                        to  [a1, b1, c1, ..., a2, b2, c2, ..., a3, b3, c3, ...]
@@ -37,8 +37,8 @@ LARGEST_CONTINUOUS_SUM = [
     largest_continuous_sum_1,
 ]
 
-CONVERT_ARRAY = [
-    convert_array_1,
+CONVERT_SEQUENCE = [
+    convert_sequence_1,
 ]
 
 GET_INF_SEQ_ELEMENT = [
@@ -71,7 +71,7 @@ class TestTask6(unittest.TestCase):
         sequence = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3', 'd1', 'd2', 'd3']
         expected_sequence = ['a1', 'b1', 'c1', 'd1', 'a2', 'b2', 'c2', 'd2', 'a3', 'b3', 'c3', 'd3']
 
-        for func in CONVERT_ARRAY:
+        for func in CONVERT_SEQUENCE:
             result = func(sequence)
             self.assertListEqual(result, expected_sequence)
 
