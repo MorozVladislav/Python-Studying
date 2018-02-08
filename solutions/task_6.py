@@ -29,10 +29,25 @@ import unittest
 def pair_sum_1(sequence, expected_sum):
     output = []
     for i in range(len(sequence)):
-        for j in range(i+1, len(sequence)):
+        for j in range(i + 1, len(sequence)):
             if sequence[i] + sequence[j] == expected_sum:
-                pair = (sequence[i], sequence[j])
-                output.append(pair)
+                output.append((sequence[i], sequence[j]))
+    return output
+
+
+def pair_sum_2(sequence, expected_sum):
+    output = []
+    while len(sequence) > 1:
+        current_value = sequence[0]
+        for i in range(1, len(sequence)):
+            if current_value + sequence[i] == expected_sum:
+                output.append((current_value, sequence[i]))
+                sequence.remove(sequence[i])
+                sequence.remove(current_value)
+                break
+            i += 1
+        if sequence[0] == current_value:
+            sequence.remove(sequence[0])
     return output
 
 
@@ -59,6 +74,18 @@ def convert_sequence_1(sequence, period=3):
     return output
 
 
+def convert_sequence_2(sequence, period=3):
+    output = []
+    while len(sequence) > 0:
+        index_correction = 0
+        for index in range(0, len(sequence), period):
+            output.append(sequence[index - index_correction])
+            sequence.remove(sequence[index - index_correction])
+            index_correction += 1
+        period -= 1
+    return output
+
+
 def get_inf_seq_element_1(index):
     counter, number_of_same_values, counter_of_same_values = 0, 0, 0
     value = True
@@ -78,8 +105,20 @@ def get_inf_seq_element_1(index):
         return 0
 
 
+def get_inf_seq_element_2(index):
+    counter_of_values, counter_of_same_values = 0, 0
+    while counter_of_values <= index:
+        counter_of_same_values += 1
+        counter_of_values = counter_of_values + counter_of_same_values
+    if counter_of_same_values % 2 == 0:
+        return 0
+    else:
+        return 1
+
+
 PAIR_SUM = [
     pair_sum_1,
+    pair_sum_2,
 ]
 
 LARGEST_CONTINUOUS_SUM = [
@@ -88,10 +127,12 @@ LARGEST_CONTINUOUS_SUM = [
 
 CONVERT_SEQUENCE = [
     convert_sequence_1,
+    convert_sequence_2,
 ]
 
 GET_INF_SEQ_ELEMENT = [
     get_inf_seq_element_1,
+    get_inf_seq_element_2,
 ]
 
 
