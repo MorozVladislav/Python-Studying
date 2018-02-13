@@ -28,10 +28,10 @@ import unittest
 
 def pair_sum_1(sequence, expected_sum):
     output = []
-    for i in range(len(sequence)):
-        for j in range(i + 1, len(sequence)):
-            if sequence[i] + sequence[j] == expected_sum:
-                output.append((sequence[i], sequence[j]))
+    for first_summand_index in range(len(sequence)):
+        for second_summand_index in range(first_summand_index + 1, len(sequence)):
+            if sequence[first_summand_index] + sequence[second_summand_index] == expected_sum:
+                output.append((sequence[first_summand_index], sequence[second_summand_index]))
     return output
 
 
@@ -39,13 +39,13 @@ def pair_sum_2(sequence, expected_sum):
     output = []
     while len(sequence) > 1:
         current_value = sequence[0]
-        for i in range(1, len(sequence)):
-            if current_value + sequence[i] == expected_sum:
-                output.append((current_value, sequence[i]))
-                sequence.remove(sequence[i])
+        for index in range(1, len(sequence)):
+            if current_value + sequence[index] == expected_sum:
+                output.append((current_value, sequence[index]))
+                sequence.remove(sequence[index])
                 sequence.remove(current_value)
                 break
-            i += 1
+            index += 1
         if sequence[0] == current_value:
             sequence.remove(sequence[0])
     return output
@@ -53,24 +53,24 @@ def pair_sum_2(sequence, expected_sum):
 
 def largest_continuous_sum_1(sequence):
     max_sum = None
-    i = len(sequence)
-    while i > 0:
-        for j in range(len(sequence) - i + 1):
-            current_sum = sum(sequence[j:j + i])
+    subsequence_length = len(sequence)
+    while subsequence_length > 0:
+        for subsequence_start_index in range(len(sequence) - subsequence_length + 1):
+            current_sum = sum(sequence[subsequence_start_index:subsequence_start_index + subsequence_length])
             if max_sum is None or current_sum > max_sum:
                 max_sum = current_sum
-        i -= 1
+        subsequence_length -= 1
     return max_sum
 
 
 def convert_sequence_1(sequence, period=3):
     output = []
-    i = 0
-    j = 0
-    while i + j < len(sequence):
-        for j in range(0, len(sequence), period):
-            output.append(sequence[i + j])
-        i += 1
+    start_index = 0
+    index_delta = 0
+    while start_index + index_delta < len(sequence):
+        for index_delta in range(0, len(sequence), period):
+            output.append(sequence[start_index + index_delta])
+        start_index += 1
     return output
 
 
@@ -89,17 +89,15 @@ def convert_sequence_2(sequence, period=3):
 def get_inf_seq_element_1(index):
     counter, number_of_same_values, counter_of_same_values = 0, 0, 0
     value = True
-    while counter <= index:
+    while counter < index:
         if counter_of_same_values < number_of_same_values:
-            output = value
             counter_of_same_values += 1
         else:
-            output = value
             value = not value
             counter_of_same_values = 0
             number_of_same_values += 1
         counter += 1
-    if output is True:
+    if value is True:
         return 1
     else:
         return 0
