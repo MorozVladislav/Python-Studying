@@ -25,15 +25,15 @@ You can implement several solutions for each test and place functions in corresp
 """
 import unittest
 from itertools import cycle
+from math import sqrt, floor
 
 
 def pair_sum_1(sequence, expected_sum):
     output = []
-    input_list = list(set(sequence))
-    for first_summand_index in range(len(input_list)):
-        for second_summand_index in range(first_summand_index + 1, len(input_list)):
-            if input_list[first_summand_index] + input_list[second_summand_index] == expected_sum:
-                output.append((input_list[first_summand_index], input_list[second_summand_index]))
+    for first_summand_index in range(len(sequence)):
+        for second_summand_index in range(first_summand_index + 1, len(sequence)):
+            if sequence[first_summand_index] + sequence[second_summand_index] == expected_sum:
+                output.append((sequence[first_summand_index], sequence[second_summand_index]))
     return output
 
 
@@ -56,14 +56,13 @@ def convert_sequence_1(sequence, period=3):
 
 
 def convert_sequence_2(sequence, period=3):
-    sublists, output = [], []
-    for index in range(period):
-        sublists.append([])
+    output = []
+    sublists = [[] for _ in range(period)]
     index = cycle(range(period))
     for element in sequence:
         sublists[next(index)].append(element)
-    for index in range(period):
-        output += sublists[index]
+    for sublist in sublists:
+        output += sublist
     return output
 
 
@@ -89,6 +88,9 @@ def get_inf_seq_element_2(index):
     return 0 if counter_of_same_values % 2 == 0 else 1
 
 
+get_inf_seq_element_3 = lambda index: 1 if floor((sqrt(1.0 + 8.0*index) + 1.0)/2.0) % 2 else 0
+
+
 PAIR_SUM = [
     pair_sum_1,
 ]
@@ -105,6 +107,7 @@ CONVERT_SEQUENCE = [
 GET_INF_SEQ_ELEMENT = [
     get_inf_seq_element_1,
     get_inf_seq_element_2,
+    get_inf_seq_element_3,
 ]
 
 
