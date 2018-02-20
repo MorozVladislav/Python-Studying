@@ -24,15 +24,16 @@ TASK: Implement at least following functions to execute unittests without errors
 You can implement several solutions for each test and place functions in corresponding lists with functions.
 """
 import unittest
+from itertools import cycle
 
 
 def pair_sum_1(sequence, expected_sum):
     output = []
-    sequence = list(set(sequence))
-    for first_summand_index in range(len(sequence)):
-        for second_summand_index in range(first_summand_index + 1, len(sequence)):
-            if sequence[first_summand_index] + sequence[second_summand_index] == expected_sum:
-                output.append((sequence[first_summand_index], sequence[second_summand_index]))
+    input_list = list(set(sequence))
+    for first_summand_index in range(len(input_list)):
+        for second_summand_index in range(first_summand_index + 1, len(input_list)):
+            if input_list[first_summand_index] + input_list[second_summand_index] == expected_sum:
+                output.append((input_list[first_summand_index], input_list[second_summand_index]))
     return output
 
 
@@ -49,9 +50,20 @@ def largest_continuous_sum_1(sequence):
 def convert_sequence_1(sequence, period=3):
     output = []
     for start_index in range(period):
-        for index_delta in range(0, len(sequence), period):
-            output.append(sequence[start_index + index_delta])
-        start_index += 1
+        for index in range(start_index, len(sequence), period):
+            output.append(sequence[index])
+    return output
+
+
+def convert_sequence_2(sequence, period=3):
+    sublists, output = [], []
+    for index in range(period):
+        sublists.append([])
+    index = cycle(range(period))
+    for element in sequence:
+        sublists[next(index)].append(element)
+    for index in range(period):
+        output += sublists[index]
     return output
 
 
@@ -87,6 +99,7 @@ LARGEST_CONTINUOUS_SUM = [
 
 CONVERT_SEQUENCE = [
     convert_sequence_1,
+    convert_sequence_2,
 ]
 
 GET_INF_SEQ_ELEMENT = [
