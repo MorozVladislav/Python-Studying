@@ -37,6 +37,34 @@ def pair_sum_1(sequence, expected_sum):
     return output
 
 
+def pair_sum_2(arr, k):
+    pairs = []
+    sorted_arr = sorted(arr)
+    left, right = (0, len(sorted_arr)-1)
+    while left < right:
+        current_sum = sorted_arr[left] + sorted_arr[right]
+        if current_sum == k:
+            pairs.append((sorted_arr[left], sorted_arr[right]))
+            left += 1  # Or right -= 1
+        elif current_sum < k:
+            left += 1
+        else:
+            right -= 1
+    return pairs
+
+
+def pair_sum_3(arr, k):
+    pairs = []
+    seen = set()
+    for num in arr:
+        target = k - num
+        if target not in seen:
+            seen.add(num)
+        else:
+            pairs.append((num, target))
+    return pairs
+
+
 def largest_continuous_sum_1(sequence):
     max_sum = None
     for subsequence_length in range(len(sequence), 0, -1):
@@ -44,6 +72,14 @@ def largest_continuous_sum_1(sequence):
             current_sum = sum(sequence[subsequence_start_index:subsequence_start_index + subsequence_length])
             if max_sum is None or current_sum > max_sum:
                 max_sum = current_sum
+    return max_sum
+
+
+def largest_continuous_sum_2(arr):
+    max_sum = current_sum = arr[0]
+    for num in arr[1:]:
+        current_sum = max(current_sum + num, num)
+        max_sum = max(current_sum, max_sum)
     return max_sum
 
 
@@ -64,6 +100,20 @@ def convert_sequence_2(sequence, period=3):
     for sublist in sublists:
         output += sublist
     return output
+
+
+def convert_sequence_3(arr, period=3):
+    n = len(arr) // period
+    return [arr[(i % n * 3) + (i // n)] for i in range(len(arr))]
+
+
+def convert_sequence_4(arr, period=3):
+    res = []
+    n = len(arr) // period
+    for i in range(period):
+        for j in range(n):
+            res.append(arr[j * period + i])
+    return res
 
 
 def get_inf_seq_element_1(index):
@@ -91,23 +141,42 @@ def get_inf_seq_element_2(index):
 get_inf_seq_element_3 = lambda index: 1 if floor((sqrt(1.0 + 8.0*index) + 1.0)/2.0) % 2 else 0
 
 
+def get_inf_seq_element_4(idx):
+    curr_idx = 0
+    result = 1
+    next_period_len = 2
+    while True:
+        if idx <= curr_idx:
+            return result
+        else:
+            result = 0 if result == 1 else 1
+            curr_idx += next_period_len
+            next_period_len += 1
+
+
 PAIR_SUM = [
     pair_sum_1,
+    pair_sum_2,
+    pair_sum_3,
 ]
 
 LARGEST_CONTINUOUS_SUM = [
     largest_continuous_sum_1,
+    largest_continuous_sum_2,
 ]
 
 CONVERT_SEQUENCE = [
     convert_sequence_1,
     convert_sequence_2,
+    convert_sequence_3,
+    convert_sequence_4,
 ]
 
 GET_INF_SEQ_ELEMENT = [
     get_inf_seq_element_1,
     get_inf_seq_element_2,
     get_inf_seq_element_3,
+    get_inf_seq_element_4,
 ]
 
 
