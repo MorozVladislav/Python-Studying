@@ -104,7 +104,7 @@ def convert_sequence_2(sequence, period=3):
 
 def convert_sequence_3(arr, period=3):
     n = len(arr) // period
-    return [arr[(i % n * 3) + (i // n)] for i in range(len(arr))]
+    return [arr[(i % n * period) + (i // n)] for i in range(len(arr))]
 
 
 def convert_sequence_4(arr, period=3):
