@@ -93,8 +93,10 @@ class TestTask7(unittest.TestCase):
         self.assertTrue(hasattr(Man, 'sing'))  # Check class attributes after mixing.
         man = Man()
         self.assertTrue(hasattr(man, 'sing'))  # Check instance attributes after mixing.
-        sound = man.sing("La la li la, la la la")
-        self.assertEqual(sound, "Man: La la li la, la la la")
+
+        text = "Hey, I just met you, and this is crazy, but here's my number, so call me, maybe?"
+        song = man.sing(text)
+        self.assertEqual(song, "Man: {}".format(text))
 
     def test_2(self):
         self.assertFalse(hasattr(Women, 'sing'))  # Check class attributes before mixing.
@@ -102,8 +104,10 @@ class TestTask7(unittest.TestCase):
         self.assertTrue(hasattr(Women, 'sing'))  # Check class attributes after mixing.
         women = Women()
         self.assertTrue(hasattr(women, 'sing'))  # Check instance attributes after mixing.
-        sound = women.sing("La la li la, la la la")
-        self.assertEqual(sound, "Women: La la li la, la la la")
+
+        text = "It's hard to look right at you, baaaabeh, but here's my number, so call me, maybe?"
+        song = women.sing(text)
+        self.assertEqual(song, "Women: {}".format(text))
 
     def test_3(self):
         # Try to declare class with error in doc-string:
