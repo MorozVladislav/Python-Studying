@@ -25,7 +25,10 @@ class MixInBase(object):
 
     @classmethod
     def mix_in(cls, new_base):
-        cls.__bases__ += (new_base,)
+        if new_base not in cls.__bases__:
+            cls.__bases__ += (new_base,)
+        else:
+            raise Exception('Class is already in bases')
 
 
 class MixInMeta(type):
@@ -38,14 +41,24 @@ class DocStyleMeta(type):
 
     def __new__(mcs, name, bases, dct):
         for key, value in dct.items():
-            if isinstance(value, types.FunctionType) and re.search('__', key) is None:
-                if value.__doc__ is None:
-                    raise DocStyleError("'{}' has no documentation string.".format(key))
-                if re.search('  ', value.__doc__) is not None:
-                    raise DocStyleError("'{}' has more than one space delimiter between words in documentation "
-                                        "string.".format(key))
-                if re.search('[A-Z]', str(key)) is not None:
-                    raise DocStyleError("'{}' has no snake-case style.".format(key))
+            if not isinstance(value, types.FunctionType) or re.match('^__.+__$', key):
+                continue
+            if value.__doc__ is None:
+                raise DocStyleError("'{}' has no documentation string.".format(key))
+            if re.search('  ', value.__doc__) is not None:
+                raise DocStyleError("'{}' has more than one space delimiter between words in documentation "
+                                    "string.".format(key))
+            if re.search('[A-Z]', key) is not None:
+                raise DocStyleError("'{}' has no snake-case style.".format(key))
+        return super(DocStyleMeta, mcs).__new__(mcs, name, bases, dct)
+
+
+class CacheMeta(type):
+
+    def __new__(mcs, name, bases, dct):
+        for key, value in dct.items():
+            if isinstance(value, types.FunctionType) and not re.match('^__.+__$', key):
+                dct[key] = cached(CACHE_LIFE_TIME)(value)
         return super().__new__(mcs, name, bases, dct)
 
 
@@ -104,15 +117,6 @@ def cached(cache_life_time):  # Just your caching function from #task_3 to use i
         return wrapped
 
     return wrapper
-
-
-class CacheMeta(type):
-
-    def __new__(mcs, name, bases, dct):
-        for key, value in dct.items():
-            if isinstance(value, types.FunctionType) and re.search('__', key) is None:
-                dct[key] = cached(CACHE_LIFE_TIME)(value)
-        return super().__new__(mcs, name, bases, dct)
 
 
 class TimeProvider(object, metaclass=CacheMeta):  # Metaclass is used to cache all methods in the class.
