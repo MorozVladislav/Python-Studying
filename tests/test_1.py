@@ -20,7 +20,7 @@ BORDER_HEIGHT = {
     'kingdom_4': [1],
 }
 EXPECTED_OUTPUT = {
-    'kingdom_1': 8,
+    'kingdom_1': 9,
     'kingdom_2': 8,
     'kingdom_3': 1,
     'kingdom_4': 1,
@@ -51,7 +51,6 @@ def castles_number(heights):
             if (heights[i] < height and start >= height) or (heights[i] > height and start <= height):
                 start = heights[i - 1]
                 height = heights[i]
-                continue
         if heights[i] == height and i == len(heights) - 1:
             castles += 1
     return castles
