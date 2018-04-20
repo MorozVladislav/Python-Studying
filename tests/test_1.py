@@ -14,16 +14,41 @@ considered to be a hill and valley simultaneously.
 import unittest
 
 BORDER_HEIGHT = {
-    'kingdom_1': [1, 2, 2, 3, 2, 3, 2, 2, 1, 1, 1, 2, 3, 3, 4, 4, 5, 4, 4, 3, 3, 4, 3, 2],
-    'kingdom_2': [-3, -3, -4, -5, -4, -3, -2, -2, -2, -1, 0, 1, 1, 1, 0, 1, 2, 1, 0, 0, 0, 1, 2, 3, 2, 2],
-    'kingdom_3': [-5, -5],
-    'kingdom_4': [1],
+    'kingdom_1':  [1, 2, 2, 3, 2, 3, 2, 2, 1, 1, 1, 2, 3, 3, 4, 4, 5, 4, 4, 3, 3, 4, 3, 2],
+    'kingdom_2':  [-3, -3, -4, -5, -4, -3, -2, -2, -2, -1, 0, 1, 1, 1, 0, 1, 2, 1, 0, 0, 0, 1, 2, 3, 2, 2],
+    'kingdom_3':  [-5, -5],
+    'kingdom_4':  [1],
+    'kingdom_5':  [1, 2, 1, 2, 1],
+    'kingdom_6':  [1, -2, 1, -2, 1],
+    'kingdom_7':  [1, 2, 1, 1, 1],
+    'kingdom_8':  [1, -2, 1, 1, 1],
+    'kingdom_9':  [1, 1, 1, 2, 1],
+    'kingdom_10': [1, 1, 1, -2, 1],
+    'kingdom_11': [1, 1, 1, 1, 2],
+    'kingdom_12': [2, 1, 1, 1, 1],
+    'kingdom_13': [1, 1, 1, 1, -2],
+    'kingdom_14': [-2, 1, 1, 1, 1],
+    'kingdom_15': [1, 1, 2, 1, 1],
+    'kingdom_16': [1, 1, -2, 1, 1],
+
 }
 EXPECTED_OUTPUT = {
-    'kingdom_1': 9,
-    'kingdom_2': 8,
-    'kingdom_3': 1,
-    'kingdom_4': 1,
+    'kingdom_1':  9,
+    'kingdom_2':  8,
+    'kingdom_3':  1,
+    'kingdom_4':  1,
+    'kingdom_5':  5,
+    'kingdom_6':  5,
+    'kingdom_7':  3,
+    'kingdom_8':  3,
+    'kingdom_9':  3,
+    'kingdom_10': 3,
+    'kingdom_11': 2,
+    'kingdom_12': 2,
+    'kingdom_13': 2,
+    'kingdom_14': 2,
+    'kingdom_15': 3,
+    'kingdom_16': 3,
 }
 
 
