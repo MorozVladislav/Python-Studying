@@ -66,18 +66,12 @@ def castles_number(heights):
             current_height = heights[i]
 
         if heights[i] != current_height:
-            if start_height is None:
-                castles += 1
-                start_height = heights[i]
-                current_height = None
-                continue
-            if (heights[i] < current_height and start_height < current_height) or \
+            if (start_height is None) or (heights[i] < current_height and start_height < current_height) or \
                     (heights[i] > current_height and start_height > current_height):
                 castles += 1
                 start_height = heights[i - 1]
                 current_height = heights[i]
-                continue
-            if (heights[i] < current_height and start_height >= current_height) or \
+            elif (heights[i] < current_height and start_height >= current_height) or \
                     (heights[i] > current_height and start_height <= current_height):
                 start_height = heights[i - 1]
                 current_height = heights[i]
