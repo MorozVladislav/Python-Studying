@@ -52,37 +52,32 @@ EXPECTED_OUTPUT = {
 }
 
 
-def castles_number(heights):
-    start_height, current_height = None, None
-    castles = 0
-
+def get_castles_number_1(heights):
     if len(heights) == 0:
-        raise Exception
+        raise Exception('Border is empty')
     if len(heights) == 1:
         return 1
 
+    castles = 0
+    current_height = heights[0]
+
     for i in range(len(heights)):
-        if current_height is None:
-            current_height = heights[i]
 
         if heights[i] != current_height:
-            if (start_height is None) or (heights[i] < current_height and start_height < current_height) or \
-                    (heights[i] > current_height and start_height > current_height):
+            if ('start_height' not in locals()
+                    or heights[i] < current_height and start_height < current_height
+                    or heights[i] > current_height and start_height > current_height):
                 castles += 1
-                start_height = heights[i - 1]
-                current_height = heights[i]
-            elif (heights[i] < current_height and start_height >= current_height) or \
-                    (heights[i] > current_height and start_height <= current_height):
-                start_height = heights[i - 1]
-                current_height = heights[i]
+            start_height = heights[i - 1]
+            current_height = heights[i]
 
-        if heights[i] == current_height and i == len(heights) - 1:
+        if i == len(heights) - 1:
             castles += 1
 
     return castles
 
 
-def get_castles_number(border):
+def get_castles_number_2(border):
     if len(border) == 0:
         raise Exception
     if len(set(border)) == 1:
@@ -108,12 +103,32 @@ def get_castles_number(border):
     return castles
 
 
+def get_castles_number_3(heights):
+    if len(heights) == 0:
+        raise Exception('Border is empty')
+    if len(set(heights)) == 1:
+        return 1
+
+    castles = 2
+    start_height, current_height = heights[0], heights[1]
+    for i in range(1, len(heights)):
+        if heights[i] != current_height:
+            if ((heights[i] < current_height and start_height < current_height)
+                    or (heights[i] > current_height and start_height > current_height)):
+                castles += 1
+            start_height = heights[i - 1]
+            current_height = heights[i]
+
+    return castles
+
+
 class TestTask(unittest.TestCase):
 
     def test_1(self):
         for key, value in BORDER_HEIGHT.items():
-            self.assertEqual(EXPECTED_OUTPUT[key], castles_number(value))
-            self.assertEqual(EXPECTED_OUTPUT[key], get_castles_number(value))
+            self.assertEqual(EXPECTED_OUTPUT[key], get_castles_number_1(value))
+            self.assertEqual(EXPECTED_OUTPUT[key], get_castles_number_2(value))
+            self.assertEqual(EXPECTED_OUTPUT[key], get_castles_number_3(value))
 
 
 if __name__ == '__main__':
