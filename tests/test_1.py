@@ -58,28 +58,25 @@ def get_castles_number_1(heights):
     if len(heights) == 1:
         return 1
 
-    castles = 0
-    current_height = heights[0]
+    castles = 1
+    start_height, current_height = None, heights[0]
 
-    for i in range(len(heights)):
+    for i in range(1, len(heights)):
 
         if heights[i] != current_height:
-            if ('start_height' not in locals()
-                    or heights[i] < current_height and start_height < current_height
-                    or heights[i] > current_height and start_height > current_height):
+            if ((start_height is None)
+                    or (heights[i] < current_height and start_height < current_height)
+                    or (heights[i] > current_height and start_height > current_height)):
                 castles += 1
             start_height = heights[i - 1]
             current_height = heights[i]
-
-        if i == len(heights) - 1:
-            castles += 1
 
     return castles
 
 
 def get_castles_number_2(border):
     if len(border) == 0:
-        raise Exception
+        raise Exception('Border is empty')
     if len(set(border)) == 1:
         return 1
 
