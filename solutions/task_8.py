@@ -8,35 +8,43 @@ from functools import reduce
 
 
 def func1(arr):
-    return sorted(arr, reverse=True)
+    # return sorted(arr, reverse=True)
+    return list(reversed(arr))
 
 
 def func2(arr):
-    return [item for sublist in arr for item in sublist]
+    # return [item for sublist in arr for item in sublist]
+    return reduce(lambda x, y: x + y, arr, [])
 
 
 def func3(arr):
-    return [reduce(lambda x, y: x + y, sublist) for sublist in arr]
+    # return [reduce(lambda x, y: x + y, sublist) for sublist in arr]
+    return list(map(sum, arr))
 
 
 def func4(arr):
-    return [sum([sublist[i] for sublist in arr]) for i in range(4)]
+    # return [sum([sublist[i] for sublist in arr]) for i in range(4)]
+    return [sum(sublist) for sublist in zip(*arr)]
 
 
 def func5(arr):
-    return [item for item in arr if item > 0]
+    # return [item for item in arr if item > 0]
+    return list(filter(lambda x: x > 0, arr))
 
 
 def func6(arr):
-    return sorted(arr, key=lambda x: int(x.split(' ')[1]))
+    return sorted(arr, key=lambda x: int(x.split()[-1]))
 
 
 def func7(arr):
-    return [False if 0 in sublist else True for sublist in arr]
+    # return [False if 0 in sublist else True for sublist in arr]
+    return [all(sublist) for sublist in arr]
 
 
 def func8(arr):
-    return [min(sublist) if min(sublist) > 0 else 0 for sublist in arr]
+    # return [min(sublist) if min(sublist) > 0 else 0 for sublist in arr]
+    # return [max(min(item), 0) for item in arr]
+    return list(map(lambda item: max(min(item), 0), arr))
 
 
 def func9(arr):
