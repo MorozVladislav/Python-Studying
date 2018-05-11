@@ -13,11 +13,11 @@ HTTPConnection.auto_open = False
 
 class MyHttpCtxManagerClass:
 
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, host):
+        self.host = host
+        self.connection = HTTPSConnection(self.host)
 
     def __enter__(self):
-        self.connection = HTTPSConnection(self.url)
         self.connection.connect()
         return self.connection
 
@@ -26,8 +26,8 @@ class MyHttpCtxManagerClass:
 
 
 @contextmanager
-def my_http_ctx_manager_func(url):
-    connection = HTTPSConnection(url)
+def my_http_ctx_manager_func(host):
+    connection = HTTPSConnection(host)
     connection.connect()
     yield connection
     connection.close()
