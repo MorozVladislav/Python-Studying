@@ -34,10 +34,24 @@ def make_addition_3(x):
     return return_value
 
 
+def make_addition_4(x):
+    return lambda y: x + y
+
+
+class make_addition_5(object):
+    def __init__(self, x):
+        self.x = x
+
+    def __call__(self, y):
+        return self.x + y
+
+
 FUNC_FACTORIES = [
     make_addition_1,
     make_addition_2,
     make_addition_3,
+    make_addition_4,
+    make_addition_5,
 ]
 
 
