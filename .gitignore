@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 .idea
 solutions/test.py
+projects/automation_basics/.pytest_cache/*
