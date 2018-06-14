@@ -1,10 +1,8 @@
 import logging
 import sys
-import pdb
 import os
 
-
-LOG_DIR = os.getcwd() + '/logs/'
+LOG_DIR = os.path.join(os.getcwd(), 'logs')
 LOGGERS = {}
 
 
@@ -22,19 +20,9 @@ def get_logger(name=None, level=logging.INFO, filename=None):
     sh.setFormatter(f)
     logger.addHandler(sh)
     logfile = filename or name or 'logs'
-    fh = logging.FileHandler(filename=LOG_DIR + logfile + '.log')
+    fh = logging.FileHandler(filename=os.path.join(LOG_DIR, '{}.log'.format(logfile)))
     fh.setFormatter(f)
     logger.addHandler(fh)
     LOGGERS[name] = logger
 
     return logger
-
-
-log = get_logger(__name__)
-
-
-if __name__ == '__main__':
-    # pdb.set_trace()
-    log.debug('Debug message')
-    log.info('Info message')
-    log.warning('Warning message')
