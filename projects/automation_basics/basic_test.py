@@ -18,15 +18,12 @@ class TestClass(object):
 
     def test_3(self):
         client = HttpClient()
-        response = client.get(URL, timeout=0.001)
-        assert response.status_code == 200
+        try:
+            client.get(URL, timeout=0.001)
+        except Exception as exc:
+            assert isinstance(exc, requests.exceptions.ConnectTimeout)
 
     def test_4(self):
         client = HttpClient()
         response = client.get(URL, decode_json=True)
         assert type(response) == dict
-
-    def test_5(self):
-        s = requests.session()
-        response = s.request('GET', URL, timeout=0.001)
-        assert response.status_code == 200

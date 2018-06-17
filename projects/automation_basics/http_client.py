@@ -1,7 +1,6 @@
 import logging
 import xml.etree.ElementTree as XmlEtree
 from contextlib import contextmanager
-import pdb
 
 import requests
 
@@ -38,7 +37,7 @@ class HttpClient(object):
         self.kwargs.update(kwargs)
         with self.session_ctx() as s:
             logger.info('Making {} request, URL: {}, parameters: {}'.format(method, url, self.kwargs,))
-            resp = s.request(method, str(self.host + self.base_url + url), self.kwargs)
+            resp = s.request(method, str(self.host + self.base_url + url), **self.kwargs)
             logger.info('Request executed in {} sec. Response code {}'.format(resp.elapsed, resp.status_code))
             logger.debug(resp.text)
 
