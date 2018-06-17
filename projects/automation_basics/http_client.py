@@ -1,7 +1,7 @@
 import logging
 import xml.etree.ElementTree as XmlEtree
 from contextlib import contextmanager
-from urllib.parse import urljoin
+import pdb
 
 import requests
 
@@ -34,23 +34,20 @@ class HttpClient(object):
         if not self.single_session:
             self.session.close()
 
-    def request(self, method, url, return_json=False, xml_tree=False, expected_rcode=None, **kwargs):
-        kwargs = self.kwargs.update(kwargs)
+    def request(self, method, url, decode_json=False, xml_tree=False, expected_rcode=None, **kwargs):
+        self.kwargs.update(kwargs)
         with self.session_ctx() as s:
-            logger.debug('Making {} request, URL: {}, parameters: {}, headers: {}, payload: {}'.format(method, url,
-                                                                                                       kwargs['params'],
-                                                                                                       kwargs['headers'],
-                                                                                                       kwargs['data']))
-            resp = s.request(method, urljoin(self.host, self.base_url, url), kwargs)
-            logger.debug('Request executed in {} sec. Response code {}'.format(resp.elapsed.strftime, resp.status_code))
+            logger.info('Making {} request, URL: {}, parameters: {}'.format(method, url, self.kwargs,))
+            resp = s.request(method, str(self.host + self.base_url + url), self.kwargs)
+            logger.info('Request executed in {} sec. Response code {}'.format(resp.elapsed, resp.status_code))
             logger.debug(resp.text)
 
             if expected_rcode is not None:
                 if resp.status_code != expected_rcode:
-                    logger.exception('Response code is {} but {} was expected'.format(resp.status_code, expected_rcode))
-                    raise Exception('Unexpected response code {}'.format(resp.status_code))
+                    logger.error('Response code is {} but {} was expected'.format(resp.status_code, expected_rcode))
+                    raise ValueError('Unexpected response code {}'.format(resp.status_code))
 
-            if return_json:
+            if decode_json:
                 return resp.json()
             if xml_tree:
                 return XmlEtree.parse(resp.text)

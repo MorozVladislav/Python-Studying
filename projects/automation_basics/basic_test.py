@@ -1,34 +1,32 @@
-import logging
+from projects.automation_basics.http_client import HttpClient
+import requests
 
-
-logger = logging.getLogger(__name__)
-
-
-def func_1(connection):
-    connection.request('GET', '/')
-    resp = connection.getresponse()
-    logger.info(resp.status)
-    return resp
-
-
-def func_2(connection):
-    connection.request('GET', '/')
-    resp = connection.getresponse()
-    logger.info(resp.status)
-    connection.close()
-    return resp
+URL = 'https://api.getchute.com/v2'
 
 
 class TestClass(object):
-    def test_func_1(self, https_connection_1):
-        assert func_1(https_connection_1).status == 200
 
-    def test_func_2(self, https_connection_2):
-        assert func_1(https_connection_2).status == 200
+    def test_1(self):
+        client = HttpClient()
+        response = client.get(URL)
+        client.close()
+        assert response.status_code == 200
 
-    def test_answer(self, cmdopt):
-        if cmdopt == "type1":
-            print("first")
-        elif cmdopt == "type2":
-            print("second")
-        # assert 0  # to see what was printed
+    def test_2(self):
+        client = HttpClient()
+        client.get(URL, expected_rcode=200)
+
+    def test_3(self):
+        client = HttpClient()
+        response = client.get(URL, timeout=0.001)
+        assert response.status_code == 200
+
+    def test_4(self):
+        client = HttpClient()
+        response = client.get(URL, decode_json=True)
+        assert type(response) == dict
+
+    def test_5(self):
+        s = requests.session()
+        response = s.request('GET', URL, timeout=0.001)
+        assert response.status_code == 200
