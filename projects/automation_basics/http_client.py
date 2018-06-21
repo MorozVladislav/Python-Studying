@@ -3,6 +3,7 @@ import xml.etree.ElementTree as XmlEtree
 from contextlib import contextmanager
 
 import requests
+from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +12,12 @@ class HttpClient(object):
 
     GET, POST, PUT, DELETE, HEAD, OPTIONS = 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'
 
-    def __init__(self, host='', base_url='', single_session=False, **kwargs):
+    def __init__(self, host='', base_url='', user=None, password=None, token=None, single_session=False, **kwargs):
         self.host = host
         self.base_url = base_url
+        self.user = user
+        self.password = password
+        self.token = token
         self.single_session = single_session
         self.kwargs = kwargs
         self._session = None
@@ -37,7 +41,14 @@ class HttpClient(object):
         self.kwargs.update(kwargs)
         with self.session_ctx() as s:
             logger.info('Making {} request, URL: {}, parameters: {}'.format(method, url, self.kwargs,))
-            resp = s.request(method, str(self.host + self.base_url + url), **self.kwargs)
+            if self.user and self.password is not None:
+                auth = HTTPBasicAuth(self.user, self.password)
+                resp = s.request(method, str(self.host + self.base_url + url), auth=auth, **self.kwargs)
+            elif self.token is not None:
+                headers = {'Authorization': 'token {}'.format(self.token)}
+                resp = s.request(method, str(self.host + self.base_url + url), headers=headers, **self.kwargs)
+            else:
+                resp = s.request(method, str(self.host + self.base_url + url), **self.kwargs)
             logger.info('Request executed in {} sec. Response code {}'.format(resp.elapsed, resp.status_code))
             logger.debug(resp.text)
 
