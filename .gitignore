@@ -105,3 +105,4 @@ venv.bak/
 .idea
 solutions/test.py
 .pytest_cache
+.env
