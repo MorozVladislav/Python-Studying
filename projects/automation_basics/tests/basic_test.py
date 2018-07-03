@@ -1,8 +1,7 @@
 import os
-import pdb
 
-from lib.http_client import HttpClient
 from steps.github_api_steps import APISteps
+from utils.http_client import HttpClient
 
 HOST = 'https://api.github.com/'
 USER = os.environ['GITHUB_USER']
@@ -20,17 +19,16 @@ class TestClass(object):
 
     def test_2(self):
         client = APISteps(host=HOST, user=USER, password=PASSWORD)
-        resp = client.authorised_get_request('user', expected_code=200)
+        params = {'type': 'owner'}
+        resp = client.get_user_repos(params=params, expected_code=200)
         assert int(resp.headers['X-RateLimit-Limit']) == 5000
+        assert resp.json()[0]['has_projects'] is True
 
     def test_3(self):
         client = APISteps(host=HOST, user=USER, password=PASSWORD)
+        client.get_token(['user', 'repo', 'delete_repo'])
         params = {'type': 'owner'}
-        resp = client.authorised_get_request('user/repos', params=params, json_to_iterable=True, expected_code=200)
-        assert resp[0]['has_projects'] is True
-
-    def test_4(self):
-        client = APISteps(host=HOST, client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-        params = {'type': 'owner'}
-        resp = client.authorised_get_request('user/repos', params=params, json_to_iterable=True, expected_code=200)
-        assert resp[0]['has_projects'] is True
+        resp = client.get_user_repos(params=params, expected_code=200)
+        assert int(resp.headers['X-RateLimit-Limit']) == 5000
+        assert resp.json()[0]['has_projects'] is True
+        client.delete_token()

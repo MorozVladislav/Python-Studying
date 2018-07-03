@@ -1,69 +1,94 @@
-import json
 import logging
-import pdb
+import random
+import string
 
 from requests.auth import HTTPBasicAuth
 
-from lib.http_client import HttpClient
+from utils.http_client import HttpClient
 
 logger = logging.getLogger(__name__)
 
 
 class APISteps(HttpClient):
 
-    def __init__(self, user=None, password=None, client_id=None, client_secret=None, token=None, **kwargs):
+    def __init__(self, user=None, password=None, token=None, **kwargs):
         super().__init__(**kwargs)
         self.user = user
         self.password = password
-        self.client_id = client_id
-        self.client_secret = client_secret
         self.token = token
+        self.authorization_id = None
 
     def authorised_request(self, method, url, **kwargs):
-        if self.user is not None and self.password is not None:
-            if self.client_id is not None or self.client_secret is not None or self.token is not None:
-                logger.warning('Multiple authentication methods parameters are provided. Basic authentication '
-                               'implemented by default')
+
+        if self.token is not None:
+            auth = OAuthToken(self.token)
+            return self.request(method, url, auth=auth, **kwargs)
+
+        elif self.user is not None and self.password is not None:
             auth = HTTPBasicAuth(self.user, self.password)
-            return super().request(method, url, auth=auth, **kwargs)
-        elif self.client_id is not None and self.client_secret is not None:
-            if self.token is not None:
-                logger.warning('Multiple authentication methods parameters are provided. OAuth application '
-                               'authentication implemented by default')
-            params = {'client_secret': self.client_secret, 'note': '{} script'.format(__name__)}
-            headers = {'Content-Length': '0'}
-            resp = super().put('authorizations/clients/{}'.format(self.client_id), params=params, headers=headers)
-            if resp.status_code == 200:
-                logger.info('Existing token successfully received')
-            if resp.status_code == 201:
-                logger.info('A new token was created')
-            pdb.set_trace()
-            return super().request(method, url, token=json.dumps(resp.text)[0]['token'])
-        elif self.token is not None:
-            headers = {'Authorization': 'token {}'.format(self.token)}
-            return super().request(method, url, headers=headers)
+            return self.request(method, url, auth=auth, **kwargs)
+
         else:
             logger.error('Authentication parameters are not specified')
             raise AuthenticationError
 
-    def authorised_get_request(self, url, **kwargs):
-        return self.authorised_request('GET', url, **kwargs)
+    def get_token(self, scopes):
 
-    def authorised_post_request(self, url, **kwargs):
-        return self.authorised_request('POST', url, **kwargs)
+        if self.user is None or self.password is None:
+            logger.error('Authentication parameters are not specified')
+            raise AuthenticationError
 
-    def authorised_put_request(self, url, **kwargs):
-        return self.authorised_request('PUT', url, **kwargs)
+        auth = HTTPBasicAuth(self.user, self.password)
+        fingerprint = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        payload = {'scopes': scopes, 'fingerprint': fingerprint, 'note': '{} script'.format(__name__)}
+        resp = self.post('authorizations', auth=auth, json=payload)
 
-    def authorised_delete_request(self, url, **kwargs):
-        return self.authorised_request('DELETE', url, **kwargs)
+        if resp.status_code == 201:
+            logger.info('New authorization token was received')
+        else:
+            logger.error('Failed to receive authorization token')
+            raise AuthenticationError
 
-    def authorised_head_request(self, url, **kwargs):
-        return self.authorised_request('HEAD', url, **kwargs)
+        self.authorization_id = resp.json()['id']
+        self.token = resp.json()['token']
 
-    def authorised_options_request(self, url, **kwargs):
-        return self.authorised_request('OPTIONS', url, **kwargs)
+    def delete_token(self):
+
+        if self.user is None or self.password is None:
+            logger.error('Authentication parameters are not specified')
+            raise AuthenticationError
+
+        if self.token is None:
+            logger.warning('Token is already empty')
+            return
+
+        auth = HTTPBasicAuth(self.user, self.password)
+        resp = self.delete('/authorizations/{}'.format(self.authorization_id), auth=auth)
+        if resp.status_code == 204:
+            logger.info('Token was successfully deleted')
+        else:
+            logger.error('Failed to delete token')
+            raise AuthenticationError
+
+    def get_user_repos(self, **kwargs):
+        return self.authorised_request('GET', 'user/repos', **kwargs)
 
 
 class AuthenticationError(Exception):
     pass
+
+
+class OAuthToken(object):
+
+    def __init__(self, token):
+        self.token = token
+
+    def __call__(self, r):
+        r.headers['Authorization'] = 'token {}'.format(self.token)
+        return r
+
+    def __eq__(self, other):
+        return self.token == getattr(other, 'token', None)
+
+    def __ne__(self, other):
+        return not self == other
