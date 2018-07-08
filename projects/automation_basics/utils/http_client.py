@@ -50,7 +50,7 @@ class HttpClient(object):
                 message = 'Response code is {} but {} was expected'.format(resp.status_code, expected_code)
                 logger.error(message)
                 logger.debug('Response: {}'.format(resp.text))
-                raise UnexpectedStatusCode(message)
+                raise UnexpectedStatusCode(resp.status_code, message)
 
             if xml_to_tree:
                 return XmlEtree.parse(resp.text)
@@ -93,4 +93,7 @@ class HttpClient(object):
 
 
 class UnexpectedStatusCode(Exception):
-    pass
+
+    def __init__(self, status_code, *args, **kwargs):
+        self.status_code = status_code
+        super().__init__(*args, **kwargs)
