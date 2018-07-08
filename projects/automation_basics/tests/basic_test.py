@@ -1,6 +1,5 @@
 import os
 import time
-import pdb
 
 from steps.github_api_steps import APISteps
 from utils.http_client import HttpClient
@@ -117,3 +116,14 @@ class TestClass(object):
         assert self.RESP.json()[repos_count]['has_issues'] is False
         assert self.RESP.json()[repos_count]['has_projects'] is False
         assert self.RESP.json()[repos_count]['has_wiki'] is False
+
+    def test_edit_nonexistent_repo(self):
+        edited_repo_description = 'Edited test repo'
+        edited_repo_homepage = 'www.example.com'
+        self.API_CLIENT = APISteps(host=HOST, user=USER, password=PASSWORD, use_token=True)
+        self.API_CLIENT.get_token(['user', 'repo', 'delete_repo'])
+        try:
+            self.API_CLIENT.edit_repo(REPO_NAME, description=edited_repo_description, homepage=edited_repo_homepage,
+                                      has_issues=False, has_projects=False, has_wiki=False)
+        except UnexpectedStatusCode as exc:
+            assert exc.status_code == 404
