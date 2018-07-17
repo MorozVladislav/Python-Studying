@@ -1,4 +1,6 @@
 import logging
+import time
+from functools import wraps
 
 from requests.auth import HTTPBasicAuth
 
@@ -7,135 +9,126 @@ from utils.http_client import HttpClient
 logger = logging.getLogger(__name__)
 
 
-def credentials_checkup(check_token=False):
-    def wrapper(func):
-        def wrapped(obj, *args, **kwargs):
-            if check_token:
-                if obj.use_token and obj.token is None:
-                    logger.error('Token is empty')
-                    raise AuthorizationError
-            else:
-                if obj.user is None or obj.password is None:
-                    logger.error('Credentials are not specified')
-                    raise AuthorizationError
-            return func(obj, *args, **kwargs)
-        return wrapped
-    return wrapper
-
-
-def user_login_checkup(func):
+def credentials_checkup(func):
+    @wraps(func)
     def wrapped(obj, *args, **kwargs):
-        if obj.user_login is None:
-            obj.get_user_login()
+        if obj.login is None or obj.password is None:
+            logger.error('Credentials are not specified')
+            raise AuthorizationError
         return func(obj, *args, **kwargs)
     return wrapped
 
 
-class APISteps(HttpClient):
+def token_checkup(func):
+    @wraps(func)
+    def wrapped(obj, *args, **kwargs):
+        if obj.use_token and obj.token is None:
+            logger.error('Token is empty')
+            raise AuthorizationError
+        return func(obj, *args, **kwargs)
+    return wrapped
 
-    def __init__(self, user=None, password=None, token=None, use_token=False, **kwargs):
+
+class GitHubAPISteps(HttpClient):
+
+    def __init__(self, login=None, password=None, token=None, use_token=False, **kwargs):
         super().__init__(**kwargs)
-        self.user = user
+        self.login = login
         self.password = password
         self.token = token
         self.use_token = use_token
         self.authorization_id = None
-        self.user_login = None
+        self._username = None
 
-    @credentials_checkup(check_token=True)
-    @credentials_checkup()
+    @property
+    def username(self):
+        if self._username is None:
+            self.get_username()
+        return self._username
+
+    @username.setter
+    def username(self, username):
+        self._username = username
+
+    @credentials_checkup
+    @token_checkup
     def authorised_request(self, method, url, **kwargs):
-
         if self.use_token:
             auth = OAuthToken(self.token)
-            return self.request(method, url, auth=auth, **kwargs)
-
         else:
-            auth = HTTPBasicAuth(self.user, self.password)
-            return self.request(method, url, auth=auth, **kwargs)
+            auth = HTTPBasicAuth(self.login, self.password)
+        return self.request(method, url, auth=auth, **kwargs)
 
-    @credentials_checkup()
+    @credentials_checkup
     def get_token(self, scopes):
-
-        auth = HTTPBasicAuth(self.user, self.password)
-        payload = {
+        auth = HTTPBasicAuth(self.login, self.password)
+        body = {
             'scopes': scopes,
             'note': '{} script'.format(__name__)
         }
-        resp = self.post('authorizations', auth=auth, json=payload, expected_code=201)
+        resp = self.post('authorizations', auth=auth, json=body, expected_code=201).json()
+        self.authorization_id = resp['id']
+        self.token = resp['token']
+        return self.token
 
-        response = resp.json()
-        self.authorization_id = response['id']
-        self.token = response['token']
-
-    @credentials_checkup()
+    @credentials_checkup
     def delete_token(self, **kwargs):
-
         if self.token is None:
             logger.warning('Token is already empty')
             return
 
         self.use_token = False
         self.token = None
-        auth = HTTPBasicAuth(self.user, self.password)
-        return self.delete('/authorizations/{}'.format(self.authorization_id), auth=auth, expected_code=204, **kwargs)
+        auth = HTTPBasicAuth(self.login, self.password)
+        return self.delete('authorizations/{}'.format(self.authorization_id), auth=auth, expected_code=204, **kwargs)
 
-    def get_user_login(self, **kwargs):
-        self.user_login = self.authorised_request('GET', 'user', **kwargs).json()['login']
-        return self.user_login
+    def get_username(self, **kwargs):
+        self._username = self.authorised_request('GET', 'user', expected_code=200, **kwargs).json()['login']
+        return self._username
 
     def get_user_repos(self, **kwargs):
         return self.authorised_request('GET', 'user/repos', expected_code=200, **kwargs)
 
-    def create_repo(self, name, description='', homepage='', private=False, has_issues=True, has_projects=True,
-                    has_wiki=True, auto_init=False, gitignore_template='', license_template='', allow_squash_merge=True,
-                    allow_merge_commit=True, allow_rebase_merge=True, **kwargs):
-        payload = {
-            'name': name,
-            'description': description,
-            'homepage': homepage,
-            'private': private,
-            'has_issues': has_issues,
-            'has_projects': has_projects,
-            'has_wiki': has_wiki,
-            'auto_init': auto_init,
-            'gitignore_template': gitignore_template,
-            'license_template': license_template,
-            'allow_squash_merge': allow_squash_merge,
-            'allow_merge_commit': allow_merge_commit,
-            'allow_rebase_merge': allow_rebase_merge
-        }
-        return self.authorised_request('POST', 'user/repos', json=payload, expected_code=201, **kwargs)
+    def create_repo(self, name, repo_properties={}, **kwargs):
+        body = {'name': name}
+        body.update(repo_properties)
+        return self.authorised_request('POST', 'user/repos', json=body, expected_code=201, **kwargs)
 
-    @user_login_checkup
-    def delete_repo(self, name, **kwargs):
-        return self.authorised_request('DELETE', 'repos/{}/{}'.format(self.user_login, name), expected_code=204,
-                                       **kwargs)
+    def delete_repo(self, name, wait_for_deletion=True, **kwargs):
+        resp = self.authorised_request(
+            'DELETE', 'repos/{}/{}'.format(self.username, name), expected_code=204, **kwargs)
+        if wait_for_deletion:
+            self.wait_for_repo_deletion(name)
+        return resp
 
-    @user_login_checkup
-    def edit_repo(self, name, description='', homepage='', private=False, has_issues=True, has_projects=True,
-                  has_wiki=True, default_branch=None, allow_squash_merge=True, allow_merge_commit=True,
-                  allow_rebase_merge=True, archived=False, **kwargs):
-        payload = {
-            'name': name,
-            'description': description,
-            'homepage': homepage,
-            'private': private,
-            'has_issues': has_issues,
-            'has_projects': has_projects,
-            'has_wiki': has_wiki,
-            'allow_squash_merge': allow_squash_merge,
-            'allow_merge_commit': allow_merge_commit,
-            'allow_rebase_merge': allow_rebase_merge,
-            'archived': archived
-        }
-        if default_branch is not None:
-            payload.update({'default_branch': default_branch})
-        return self.authorised_request('PATCH', 'repos/{}/{}'.format(self.user_login, name), json=payload,
+    def wait_for_repo_deletion(self, name, repo_delete_timeout=5, repo_delete_sleep=0.5):
+        del_time = time.time()
+        params = {'type': 'owner'}
+        while time.time() - del_time < repo_delete_timeout:
+            if name not in self.get_user_repos(params=params).json():
+                return True
+            else:
+                time.sleep(repo_delete_sleep)
+        message = 'Failed to delete repository within {} sec'.format(repo_delete_timeout)
+        logger.error(message)
+        raise DeletionError(message)
+
+    def edit_repo(self, name, repo_properties={}, **kwargs):
+        body = {'name': name}
+        body.update(repo_properties)
+        return self.authorised_request('PATCH', 'repos/{}/{}'.format(self.username, name), json=body,
                                        expected_code=200, **kwargs)
 
 
-class AuthorizationError(Exception):
+class APIStepsError(Exception):
+    pass
+
+
+class AuthorizationError(APIStepsError):
+    pass
+
+
+class DeletionError(APIStepsError):
     pass
 
 
