@@ -1,8 +1,7 @@
 import os
 
 
-class Config(object):
-
+class APITestsConfig(object):
     HOST = 'https://api.github.com/'
     LOGIN = os.environ['GITHUB_USER']
     PASSWORD = os.environ['GITHUB_PSWD']

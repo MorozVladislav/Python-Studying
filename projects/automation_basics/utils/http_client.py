@@ -38,9 +38,9 @@ class HttpClient(object):
         full_url = urljoin(self.url, url)
         self.kwargs.update({'params': params, 'headers': headers, 'data': data, 'json': json})
         self.kwargs.update(kwargs)
-        logger.info('Making {} request:\nURL: {}\nPARAMS: {}\nHEADERS: {}\nBODY: {}'
-                    'JSON: {}'.format(method, full_url, self.kwargs['params'], self.kwargs['headers'],
-                                      self.kwargs['data'], self.kwargs['json']))
+        logger.info('Making {} request:\n        URL: {}\n        PARAMS: {}\n        HEADERS: {}\n        BODY: {}'
+                    '\n        JSON: {}'.format(method, full_url, self.kwargs['params'], self.kwargs['headers'],
+                                                self.kwargs['data'], self.kwargs['json']))
         with self.session_ctx() as s:
             resp = s.request(method, full_url, **self.kwargs)
             logger.info('Request executed in {} sec. Response code {}'.format(resp.elapsed, resp.status_code))

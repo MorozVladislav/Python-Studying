@@ -46,10 +46,6 @@ class GitHubAPISteps(HttpClient):
             self.get_username()
         return self._username
 
-    @username.setter
-    def username(self, username):
-        self._username = username
-
     @credentials_checkup
     @token_checkup
     def authorised_request(self, method, url, **kwargs):
@@ -86,8 +82,11 @@ class GitHubAPISteps(HttpClient):
         self._username = self.authorised_request('GET', 'user', expected_code=200, **kwargs).json()['login']
         return self._username
 
-    def get_user_repos(self, **kwargs):
+    def get_repos(self, **kwargs):
         return self.authorised_request('GET', 'user/repos', expected_code=200, **kwargs)
+
+    def get_user_repos(self, username, **kwargs):
+        return self.authorised_request('GET', 'users/{}/repos'.format(username), expected_code=200, **kwargs)
 
     def create_repo(self, name, repo_properties={}, **kwargs):
         body = {'name': name}
@@ -105,7 +104,7 @@ class GitHubAPISteps(HttpClient):
         del_time = time.time()
         params = {'type': 'owner'}
         while time.time() - del_time < repo_delete_timeout:
-            if name not in self.get_user_repos(params=params).json():
+            if name not in self.get_repos(params=params).json():
                 return True
             else:
                 time.sleep(repo_delete_sleep)
@@ -118,6 +117,14 @@ class GitHubAPISteps(HttpClient):
         body.update(repo_properties)
         return self.authorised_request('PATCH', 'repos/{}/{}'.format(self.username, name), json=body,
                                        expected_code=200, **kwargs)
+
+    def get_repo_topics(self, repo_name, username=None, **kwargs):
+        if username is None:
+            return self.authorised_request('GET', 'repos/{}/{}/topics'.format(self.username, repo_name),
+                                           expected_code=200, **kwargs)
+        else:
+            return self.authorised_request('GET', 'repos/{}/{}/topics'.format(username, repo_name),
+                                           expected_code=200, **kwargs)
 
 
 class APIStepsError(Exception):
