@@ -1,6 +1,7 @@
-import paramiko
 import logging
+import time
 
+import paramiko
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class SSHClient(object):
 
     @property
     def shell(self):
-        if self.shell is None:
+        if self._shell is None:
             message = 'Shell was not opened'
             logger.error(message)
             raise ShellNotOpenedException(message)
@@ -77,7 +78,7 @@ class SSHClient(object):
             raise ConnectionFailedException(message)
 
     def execute(self, command, *args, **kwargs):
-        return self.client.exec_command(command, environment=self.environment, *args, **kwargs)
+        return self.client.exec_command(command.strip('\n'), environment=self.environment, *args, **kwargs)
 
     def open_shell(self):
         self._shell = self.client.invoke_shell()
@@ -85,11 +86,12 @@ class SSHClient(object):
 
     def execute_in_shell(self, command):
         self.shell.send(command + '\n')
-        result = self.shell.recv(1024)
+        result = self.shell.recv(1)
         while self.shell.recv_ready():
-            result += self.shell.recv(1024)
-        str_result = str(result)
-        str_result.replace('\r', '')
+            result += self.shell.recv(1)
+            if not self.shell.recv_ready():
+                time.sleep(0.01)
+        str_result = str(result, 'utf8')
         return str_result
 
     def close_shell(self):
