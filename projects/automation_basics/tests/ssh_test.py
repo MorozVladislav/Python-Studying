@@ -1,4 +1,5 @@
 import re
+import pdb
 
 from utils.ssh_client import SSHClientException, ConnectionFailedException, ShellNotOpenedException
 
@@ -60,3 +61,11 @@ class TestSSH(object):
             ssh_client.execute_in_shell("grep 'AGP' /boot/config-3.10.0-862.6.3.el7.x86_64")
         except SSHClientException as exc:
             assert type(exc) == ShellNotOpenedException
+
+    def test_cd_and_ls_steps(self, linux_client):
+        linux_client.cd('/boot', execute_in_shell=True)
+        result = linux_client.ls('./', options=['-al'], execute_in_shell=True)
+        lines = result.split('\r\n')
+        for line in lines:
+            if re.search(r'config', line) is not None:
+                assert ('config-3.10.0-862.6.3.el7.x86_64' or 'config-3.10.0-862.el7.x86_64') in line.split(' ')

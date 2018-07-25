@@ -90,7 +90,7 @@ class SSHClient(object):
         while self.shell.recv_ready():
             result += self.shell.recv(1)
             if not self.shell.recv_ready():
-                time.sleep(0.01)
+                time.sleep(0.1)
         str_result = str(result, 'utf8')
         return str_result
 
