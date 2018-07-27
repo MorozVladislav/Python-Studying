@@ -1,7 +1,6 @@
 import logging
-from utils.ssh_client import SSHClient
-import pdb
 
+from utils.ssh_client import SSHClient
 
 logger = logging.getLogger(__name__)
 
@@ -25,32 +24,32 @@ class LinuxSteps(SSHClient):
         self.connect(use_key=use_key)
         self.open_shell()
 
-    def step(self, command, path, options=[], execute_in_shell=False):
+    def step(self, command, path, options=[], execute_in_shell=False, **kwargs):
         signature = [command]
         signature += options
         signature.append(path)
         str_signature = ' '.join(signature)
         if execute_in_shell:
             logger.info('Executing in shell {}'.format(str_signature))
-            return self.execute_in_shell(str_signature)
+            return self.execute_in_shell(str_signature, **kwargs)
         else:
-            logger.info('Executing {}'.format(str_signature))
+            logger.info('Executing {}'.format(str_signature, **kwargs))
             return self.execute(str_signature)
 
-    def cd(self, path, options=[], execute_in_shell=False):
-        return self.step('cd', path, options, execute_in_shell)
+    def cd(self, path, options=[], execute_in_shell=False, **kargs):
+        return self.step('cd', path, options, execute_in_shell, **kargs)
 
-    def mkdir(self, path, options=[], execute_in_shell=False):
-        return self.step('mkdir', path, options, execute_in_shell)
+    def mkdir(self, path, options=[], execute_in_shell=False, **kwargs):
+        return self.step('mkdir', path, options, execute_in_shell, **kwargs)
 
-    def rm(self, path, options=[], execute_in_shell=False):
-        return self.step('rm', path, options, execute_in_shell)
+    def rm(self, path, options=[], execute_in_shell=False, **kwargs):
+        return self.step('rm', path, options, execute_in_shell, **kwargs)
 
-    def ls(self, path, options=[], execute_in_shell=False):
-        return self.step('ls', path, options, execute_in_shell)
+    def ls(self, path, options=[], execute_in_shell=False, **kwargs):
+        return self.step('ls', path, options, execute_in_shell, **kwargs)
 
-    def cp(self, source, destination, options=[], execute_in_shell=False):
-        return self.step('ls', ' '.join([source, destination]), options, execute_in_shell)
+    def cp(self, source, destination, options=[], execute_in_shell=False, **kwargs):
+        return self.step('cp', ' '.join([source, destination]), options, execute_in_shell, **kwargs)
 
-    def mv(self, source, directory, options=[], execute_in_shell=False):
-        return self.step('ls', ' '.join([source, directory]), options, execute_in_shell)
+    def mv(self, source, directory, options=[], execute_in_shell=False, **kwargs):
+        return self.step('mv', ' '.join([source, directory]), options, execute_in_shell, **kwargs)

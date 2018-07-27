@@ -1,5 +1,6 @@
 import logging
 import time
+from collections import namedtuple
 
 import paramiko
 
@@ -77,22 +78,45 @@ class SSHClient(object):
             logger.error(message)
             raise ConnectionFailedException(message)
 
-    def execute(self, command, *args, **kwargs):
-        return self.client.exec_command(command.strip('\n'), environment=self.environment, *args, **kwargs)
+    def execute(self, command, raise_on_error=False, **kwargs):
+        result = namedtuple('result', ['stdout', 'stderr', 'r_code', 'exec_time'])
+        start = time.time()
+        stdin, stdout, stderr = self.client.exec_command(command.strip('\n'), environment=self.environment, **kwargs)
+        result.r_code = stdout.channel.recv_exit_status()
+
+        if raise_on_error and result.r_code != 0:
+            message = 'Failed to execute {}'.format(command.strip('\n'))
+            logger.error(message)
+            raise CommandExecutionException(message)
+
+        result.exec_time = time.time() - start
+        result.stdout = ''.join(stdout.readlines())
+        result.stderr = ''.join(stderr.readlines())
+        logger.info('Command {} executed in {} sec'.format(command.strip('\n'), result.exec_time))
+        return result
 
     def open_shell(self):
         self._shell = self.client.invoke_shell()
         logger.info('New shell was opened')
 
-    def execute_in_shell(self, command):
-        self.shell.send(command + '\n')
-        result = self.shell.recv(1)
+    def execute_in_shell(self, command, raise_on_error=False, chunk_size=1024):
+        result = namedtuple('result', ['output', 'r_code', 'exec_time'])
+        start = time.time()
+        self.shell.send(command.strip('\n'))
+        import pdb; pdb.set_trace()
+        result.r_code = self.shell.recv_exit_status()
+
+        if raise_on_error and result.r_code != 0:
+            message = 'Failed to execute in shell {}'.format(command.strip('\n'))
+            logger.error(message)
+            raise CommandExecutionException(message)
+
+        result.exec_time = time.time() - start
+        result.output = self.shell.recv(chunk_size)
         while self.shell.recv_ready():
-            result += self.shell.recv(1)
-            if not self.shell.recv_ready():
-                time.sleep(0.1)
-        str_result = str(result, 'utf8')
-        return str_result
+            result += self.shell.recv(chunk_size)
+        result.output = str(result.output, 'utf8')
+        return result
 
     def close_shell(self):
         self.shell.close()
@@ -109,4 +133,8 @@ class ShellNotOpenedException(SSHClientException):
 
 
 class ConnectionFailedException(SSHClientException):
+    pass
+
+
+class CommandExecutionException(SSHClientException):
     pass
