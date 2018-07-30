@@ -28,19 +28,10 @@ class SSHClient(object):
         self.host_keys = paramiko.HostKeys()
         self.client = paramiko.SSHClient()
         self.host_keys = self.client.get_host_keys()
-        self._shell = None
 
     def __del__(self):
         self.client.close()
         logger.info('SSH client was closed')
-
-    @property
-    def shell(self):
-        if self._shell is None:
-            message = 'Shell was not opened'
-            logger.error(message)
-            raise ShellNotOpenedException(message)
-        return self._shell
 
     def add_system_known_hosts(self, path=None):
         self.client.load_system_host_keys(path)
@@ -95,40 +86,8 @@ class SSHClient(object):
         logger.info('Command {} executed in {} sec'.format(command.strip('\n'), result.exec_time))
         return result
 
-    def open_shell(self):
-        self._shell = self.client.invoke_shell()
-        logger.info('New shell was opened')
-
-    def execute_in_shell(self, command, raise_on_error=False, chunk_size=1024):
-        result = namedtuple('result', ['output', 'r_code', 'exec_time'])
-        start = time.time()
-        self.shell.send(command.strip('\n'))
-        import pdb; pdb.set_trace()
-        result.r_code = self.shell.recv_exit_status()
-
-        if raise_on_error and result.r_code != 0:
-            message = 'Failed to execute in shell {}'.format(command.strip('\n'))
-            logger.error(message)
-            raise CommandExecutionException(message)
-
-        result.exec_time = time.time() - start
-        result.output = self.shell.recv(chunk_size)
-        while self.shell.recv_ready():
-            result += self.shell.recv(chunk_size)
-        result.output = str(result.output, 'utf8')
-        return result
-
-    def close_shell(self):
-        self.shell.close()
-        self._shell = None
-        logger.info('Current shell was closed')
-
 
 class SSHClientException(Exception):
-    pass
-
-
-class ShellNotOpenedException(SSHClientException):
     pass
 
 
